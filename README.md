@@ -20,6 +20,6 @@ Major tasks are completed.  Those are the tasks that verify that the currently r
 
 See the TODO list at the end of the main source file, "ckkern.rkt."
 
-![Screenshot](doc/Screenshot at 2019-12-13 05-33-41.png)
-ckkern running in DrRacket. A binary executable can be crated from the {Racket} menu.
+![Screenshot](doc/Screenshot%20at%202019-12-13%2005-33-41.png)
+CkKern running in DrRacket. A binary executable can be crated from the {Racket} menu.
 
