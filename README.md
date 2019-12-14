@@ -23,3 +23,6 @@ See the TODO list at the end of the main source file, "ckkern.rkt."
 ![Screenshot](doc/Screenshot%20at%202019-12-13%2005-33-41.png)\
 CkKern running in DrRacket. A binary executable can be crated from the {Racket} menu.
 
+## NOTES
+In order to read /boot/grub/grub.cfg, that file needs to be made readable to ckkern.  Either run ckkern as superuser
+or add the user to the wheel or root group, then  ( cd/boot/grub; chgrp wheel grub.cfg; chmod g+r grub.cfg).

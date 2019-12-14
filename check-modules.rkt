@@ -9,33 +9,33 @@
                           "vboxnetflt" "vboxdrv" ))
 (define %modnames (map (lambda(s)(string-append s ".ko")) %modules))
 
-
-;;(define mod-dirs (directory-list "/lib/modules"))
-
+#|
 ;;; Find the critical modules in the specified path
-(define (show-critical-modules-found modpath)
-  (define (modules-found modpath) 
- 
-    (= (length (modules-found  modpath)) (length %modules)))
-  (map (lambda(p)(path->string (file-name-from-path p))) 
-       (modules-found modpath)))
+(map (lambda(p)(path->string (file-name-from-path p))) 
+         (modules-found modpath)))
+  |#
+
+;;; Determine if al the critcal modules exest.
+;;; 1. find the modules in /lib/modules/kver that are critical
+;;; 2. Determine if the count is the same as the number of criticals
+(define (required-module? p)
+  (and (>  (inc! seq ) (* 256 (length %modules))) (error "too much!"))
+  (member (last (string-split (path->string p) "/")) %modnames
+          string=?)) 
+
 
 (define (critical-modules-exist? kver)
-  (define (required-module? p)
-    (and (>  (inc! seq ) (* 256 (length %modules))) (error "too much!"))
-    (member (last (string-split (path->string p) "/")) %modnames
-            string=?)) 
-  (define (modules-ok? modpath) 
+  (define (modules-found modpath)
     (find-files required-module? modpath #:follow-links? #f))
+  (define (modules-ok? modpath)
+    (display (modules-found modpath))
+    (= (length (modules-found  modpath)) (length %modules)))
+
   (set! seq 0)
-  (let ((modpath (string-append "/lib/modules/" kver)))
+  (let ((modpath (string-append "/lib/modules/" kver)))  
     (if (not (modules-ok? modpath))
-        (displayln (string-append "e (" modpath "): missing some critical modules") stderr)
+        (begin (displayln (string-append "e (" modpath "): missing some critical modules") stderr) #f)
         #t)))
 
-#|
-(define (run-test)
-  (critical-modules-exist? "4.19.82-gentoo-lf00"))
 
-(run-test)
-|#
+  
