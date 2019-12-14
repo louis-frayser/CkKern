@@ -9,12 +9,6 @@
                           "vboxnetflt" "vboxdrv" ))
 (define %modnames (map (lambda(s)(string-append s ".ko")) %modules))
 
-#|
-;;; Find the critical modules in the specified path
-(map (lambda(p)(path->string (file-name-from-path p))) 
-         (modules-found modpath)))
-  |#
-
 ;;; Determine if al the critcal modules exest.
 ;;; 1. find the modules in /lib/modules/kver that are critical
 ;;; 2. Determine if the count is the same as the number of criticals
@@ -28,7 +22,6 @@
   (define (modules-found modpath)
     (find-files required-module? modpath #:follow-links? #f))
   (define (modules-ok? modpath)
-    (display (modules-found modpath))
     (= (length (modules-found  modpath)) (length %modules)))
 
   (set! seq 0)
@@ -38,4 +31,3 @@
         #t)))
 
 
-  
