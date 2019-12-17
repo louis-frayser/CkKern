@@ -1,5 +1,5 @@
 .SUFFIXES: .rkt
-Srcs=check-modules.rkt ckkern.rkt io.rkt kernsrc.rkt
+Srcs= ckkern.rkt io.rkt 
 TestSrcs=unit-tests.rkt
 % : %.rkt
 	raco exe $<
