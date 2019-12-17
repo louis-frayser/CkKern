@@ -1,8 +1,6 @@
 #lang racket
 (require srfi/13) ;; string-suffix?, string-contains
-(require "kernel-io.rkt")
-(require "check-modules.rkt")
-(require "kernsrc.rkt")
+(require "io.rkt" )
 ;; ----------------------------------------------------
 (define (basename str)
   (last (string-split str "/")))
@@ -61,9 +59,3 @@ TODO...
 ;;; Maybe run lxc-config .. or duplicate it
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
-#|
-
-(map check-modules-for (get-kernel-images-paths))
-(define %kver (get-kernel-version))
-(boot-image-exists? %kver)
- |#
