@@ -5,11 +5,13 @@
 (require srfi/13) ; Strings
 
 (provide  boot-image-exists? booted-image-exists? 
-          critical-modules-exist? get-bootable-images
+          critical-modules-exist? df/boot-pct get-bootable-images
           get-kernel-version
-          grub-configured-for? sources-exist?)
+          grub-configured-for? sources-exist? stderr)
+
 
 (define stderr (current-error-port))
+
 ;;; ==========================================================
 ;;; /proc
 ;;; Check for current boot image unless another specified
@@ -69,14 +71,21 @@
 (define (test0) (let ((bs (get-blessed-kernels)))
                   (cons bs (length bs))))
  
-;; --------------------------------------------------                     
+;;; ----------------------------------------------                  
 ;;; system()
+(define-syntax-rule (shell command )
+  (string-trim-right(with-output-to-string
+                      (lambda()(system command)))))
 
 (define (get-kernel-version)
   (string-trim-right (with-output-to-string 
                        (lambda () (system "uname -r")))))
+;;; free space on /boot as a percentage
+(define (df/boot-pct)
+  (- 100 (string->number
+(shell "df /boot | { read ; read _fs _sz _us _av pct _mp;  echo  ${pct%\\%} ; }"))))
 
-;; --------------------------------------------------                     
+;;; ------------------------------------------                     
 ;;; GRUB
 (define (grub-configured-for? kver)
   (with-input-from-file "/boot/grub/grub.cfg"
