@@ -52,22 +52,26 @@
 
 (displayln "Verifying disk space on /boot...")
 (let ((bfree (df/boot-pct)) )
-  (cond ( (< bfree 10)
-          (displayln
-           (format "w (/boot):  Only ~a% of disk is free!" bfree) stderr)
-          #f)
-        (else #t)))
+  (displayln
+   (format "   I (/boot):  ~a% of disk is free!" bfree))
+   (cond ( (< bfree 10)
+           (displayln "   W (/boot) space is low." stderr)
+           #f)
+         (else #t)))
              
-;;; Check for 10% space free on /boot
+  ;;; Check for 10% space free on /boot
 
-#|
+  #|
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
+;;; Verify that linux-headers match kernel version
 ;;; Verify that the latest blessed kernel is installed in /usr/src
 ;;; Verify all local souces in /usr/src/linux-* are compiled to /boot
 ;;; Verify all kernels in /boot are configured in GRUB
+;;; Verify that the currently running kernel is the latest.
 ;;; Check for unblessed sources in /usr/src/linux-*
 ;;; Check for extraneouse modules in /lib/modules (no matching kern)
 ;;; Maybe run lxc-config .. or duplicate it
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
+  
