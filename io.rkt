@@ -3,6 +3,7 @@
 ;;;;
 ;; caution: Racket's string functions are diff from srfi's
 (require srfi/13) ; Strings
+(require "params.rkt")
 
 (provide  boot-image-exists? booted-image-exists? 
           critical-modules-exist? df/boot-pct get-bootable-images
@@ -29,16 +30,17 @@
 ;;; /boot
 
 ;; find kernel file  for kver
+;; FIXME: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 (define (boot-image-exists? kver)
   (file-exists?
-   (string-append "/boot/kernel-genkernel-x86_64-" kver)))
+   (string-append "/boot/kernel-" %kname "-x86_64-" kver)))
 
 (define (get-bootable-images)
   (define maybe-kernel?
     (lambda(p)
       (let ((s (path->string p)))
         (cond  ( (string=? "/boot" s) #t)
-               ((string-prefix? "/boot/kernel-genkernel" s)  #t)
+               ((string-prefix? (string-append "/boot/kernel-" %kname) s)  #t)
                (else  #f)))))
   (filter (lambda(s)(not (string=? s "/boot")))
           (map (lambda(p)(path->string p))
@@ -83,7 +85,7 @@
 ;;; free space on /boot as a percentage
 (define (df/boot-pct)
   (- 100 (string->number
-(shell "df /boot | { read ; read _fs _sz _us _av pct _mp;  echo  ${pct%\\%} ; }"))))
+          (shell "df /boot | { read ; read _fs _sz _us _av pct _mp;  echo  ${pct%\\%} ; }"))))
 
 ;;; ------------------------------------------                     
 ;;; GRUB
@@ -120,24 +122,35 @@
   (define (modules-found modpath)
     (set! seq 0)
     (find-files required-module? modpath #:follow-links? #f))
+
+  ;; Verify all critical modules exists in given modpath
+  ;;; FIXME: display names of missing modules
   (define (modules-ok? modpath)
-    (= (length (modules-found  modpath)) (length %modules)))
+    (let ((mfound (modules-found modpath)))
+      (cond      
+        ((= (length mfound) (length %modules))
+         #t)
+        (else  
+         (display "found: ") (displayln mfound)
+         (display "expected: ") (displayln %modules)
+         #f))))
 
-  (let ((modpath (string-append "/lib/modules/" kver)))  
-    (if (not (modules-ok? modpath))
-        (begin (displayln (string-append "e (" modpath "): missing some critical modules") stderr) #f)
-        #t)))
-;;; --------------------------------------------------------
-;;; Kernel sources /usr/src/linux--*
-(define (sources-exist? kver)
-  ;;; Trim the local suffix from kernel version
-  ;;; 4.19.86-gentoo-lf00 => 4.19.86-gentoo
-  (define (generic-kernel-version kver)
-    (first (string-split kver "-" )))
+    (let ((modpath (string-append "/lib/modules/" kver)))  
+      (if (not (modules-ok? modpath))
+          (begin (displayln (string-append "(" modpath "): e - missing some critical modules") stderr) #f)
+          #t)))
+  ;;; --------------------------------------------------------
+  ;;; Kernel sources /usr/src/linux--*
+  (define (sources-exist? kver)
+    ;;; Trim the local suffix from kernel version
+    ;;; 4.19.86-gentoo-lf00 => 4.19.86-gentoo
+    (define (generic-kernel-version kver)
+      (first (string-split kver "-" )))
 
-  (define (ksrc-dir kver)
-    ;;; Return the directory containg specific kernel sources
-    (string-append "/usr/src/linux-" (generic-kernel-version kver) "-gentoo")) 
-  (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
-    (file-exists? ksrc-mak)))
-;; --------------------------------------------------------
+    (define (ksrc-dir kver)
+      ;;; Return the directory containg specific kernel sources
+      (string-append "/usr/src/linux-" (generic-kernel-version kver) "-gentoo")) 
+    (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
+      (file-exists? ksrc-mak)))
+  ;; --------------------------------------------------------
+  

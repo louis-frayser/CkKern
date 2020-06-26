@@ -1,6 +1,6 @@
 #lang racket
 (require srfi/13) ;; string-suffix?, string-contains
-(require "io.rkt")
+(require "params.rkt" "io.rkt")
 
 ;; ----------------------------------------------------
 (define (basename str)
@@ -36,10 +36,11 @@
   (if (string-prefix? pfx str)
       (string-drop str (string-length pfx))
       str))
+
 (define (mod-version img-path)
   (let*((basename (last (string-split img-path "/")))
         (generic (drop-suffix ".old" basename)))
-    (drop-prefix "kernel-genkernel-x86_64-" generic)))
+    (drop-prefix (string-append "kernel-" %kname "-x86_64-") generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
 (displayln "Verifying critical modules for main kernels in /boot...")
