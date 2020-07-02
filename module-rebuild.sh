@@ -5,7 +5,7 @@
 ### Usage:
 ### 1. sh module-rebuld.sh >cmds
 ### 2. cat cmds
-### 3. Copy and past, or run cmds (sh cmds)
+### 3. Copy and paste, or run cmds (sh cmds)
 echo(){ command echo "$@" ;} 1>&2
  out(){ command echo "$@" ;}
 
@@ -15,11 +15,11 @@ Kernels=$(eselect kernel list | {
 	      do command echo $version;
 	      done ;})
 ### Modules
-declare -A MDict
-MDict[loop]="sys-fs/loop-aes"
-MDict[zfs]="sys-fs/zfs-kmod"
-MDict[vboxdrv]="app-emulation/virtualbox-modules"
-
+declare -A MDict=(
+    [loop]="sys-fs/loop-aes"
+    [zfs]="sys-fs/zfs-kmod"
+    [vboxdrv]="app-emulation/virtualbox-modules"
+)
 
 ### Loop throughh kernel versions
 ### For each version and missing module package
