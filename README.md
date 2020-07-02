@@ -21,7 +21,7 @@ Major tasks are completed.  Those are the tasks that verify that the currently r
 See the TODO list at the end of the main source file, "ckkern.rkt."
 
 ![Screenshot](doc/Screenshot%20at%202019-12-13%2005-33-41.png)\
-CkKern running in DrRacket. A binary executable can be crated from the {Racket} menu.
+CkKern running in DrRacket. A binary executable can be created from the {Racket} menu.
 
 ## NOTES
 In order to read /boot/grub/grub.cfg, that file needs to be made readable to ckkern.  Either run ckkern as superuser
