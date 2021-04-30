@@ -40,7 +40,7 @@
 (define (mod-version img-path)
   (let*((basename (last (string-split img-path "/")))
         (generic (drop-suffix ".old" basename)))
-    (drop-prefix (string-append "kernel-" %kname "-x86_64-") generic)))
+    (drop-prefix (string-append "kernel-" %kname% "-x86_64-") generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
 (displayln "Verifying critical modules for main kernels in /boot...")

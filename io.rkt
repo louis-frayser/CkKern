@@ -7,7 +7,7 @@
 
 (provide  boot-image-exists? booted-image-exists? 
           critical-modules-exist? df/boot-pct get-bootable-images
-          get-kernel-version
+          get-kernel-version 
           grub-configured-for? sources-exist? stderr)
 
 
@@ -33,14 +33,14 @@
 ;; FIXME: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 (define (boot-image-exists? kver)
   (file-exists?
-   (string-append "/boot/kernel-" %kname "-x86_64-" kver)))
+   (string-append "/boot/kernel-" %kname% "-x86_64-" kver)))
 
 (define (get-bootable-images)
   (define maybe-kernel?
     (lambda(p)
       (let ((s (path->string p)))
         (cond  ( (string=? "/boot" s) #t)
-               ((string-prefix? (string-append "/boot/kernel-" %kname) s)  #t)
+               ((string-prefix? (string-append "/boot/kernel-" %kname%) s)  #t)
                (else  #f)))))
   (filter (lambda(s)(not (string=? s "/boot")))
           (map (lambda(p)(path->string p))
@@ -107,16 +107,13 @@
   ;;; Determine if all the critcal modules exist.
   ;;; 1. find the modules in /lib/modules/kver that are critical
   ;;; 2. Determine if the count is the same as the number of criticals
-  (define %modules '("loop" "zfs" "spl" "vboxpci" "vboxnetadp"
-                            "vboxnetflt" "vboxdrv" ))
-  (define %modnames (map (lambda(s)(string-append s ".ko")) %modules))
   
   (define seq #f) ; Counter check for too many files processed
   (define-syntax-rule (inc! x) (begin (set! x (+  x 1)) x))
 
   (define (required-module? p)
-    (and (>  (inc! seq ) (* 256 (length %modules))) (error "too much!"))
-    (member (last (string-split (path->string p) "/")) %modnames
+    (and (>  (inc! seq ) (* 256 (length %modules%))) (error "too much!"))
+    (member (last (string-split (path->string p) "/")) %modnames%
             string=?)) 
 
   (define (modules-found modpath)
@@ -124,15 +121,17 @@
     (find-files required-module? modpath #:follow-links? #f))
 
   ;; Verify all critical modules exists in given modpath
-  ;;; FIXME: display names of missing modules
+  (define (simple-module-name m)
+    (car (string-split (path->string (file-name-from-path m)) ".")))
+  
   (define (modules-ok? modpath)
     (let ((mfound (modules-found modpath)))
       (cond      
-        ((= (length mfound) (length %modules))
+        ((= (length mfound) (length %modules%))
          #t)
         (else  
-         (display "found: ") (displayln mfound)
-         (display "expected: ") (displayln %modules)
+         (display "found   : ")  (displayln (sort (map simple-module-name mfound) string< )) 
+         (display "expected: ") (displayln (sort  %modules% string< ))
          #f))))
 
     (let ((modpath (string-append "/lib/modules/" kver)))  
