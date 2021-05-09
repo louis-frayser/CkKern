@@ -125,31 +125,38 @@
     (car (string-split (path->string (file-name-from-path m)) ".")))
   
   (define (modules-ok? modpath)
-    (let ((mfound (modules-found modpath)))
-      (cond      
-        ((= (length mfound) (length %modules%))
-         #t)
-        (else  
-         (display "found   : ")  (displayln (sort (map simple-module-name mfound) string< )) 
-         (display "expected: ") (displayln (sort  %modules% string< ))
-         #f))))
+    (cond ((empty? %modules%) #t)
+          ((directory-exists? modpath) 
+           (let ((mfound (modules-found modpath)))
+             (cond      
+               ((= (length mfound) (length %modules%))
+                #t)
+               (else
+                (let* ( (found  (sort (map simple-module-name mfound) string< ))
+                        (expected (sort  %modules% string< ))
+                        (missing (set-subtract expected found)))
+                  (display (format "e - missing ~a" missing) stderr)         
+                  #f)))))
+          (else 
+           (display
+            (format "e - (~s): modules directory missing"
+                    modpath) stderr) #f)))
 
-    (let ((modpath (string-append "/lib/modules/" kver)))  
-      (if (not (modules-ok? modpath))
-          (begin (displayln (string-append "(" modpath "): e - missing some critical modules") stderr) #f)
-          #t)))
-  ;;; --------------------------------------------------------
-  ;;; Kernel sources /usr/src/linux--*
-  (define (sources-exist? kver)
-    ;;; Trim the local suffix from kernel version
-    ;;; 4.19.86-gentoo-lf00 => 4.19.86-gentoo
-    (define (generic-kernel-version kver)
-      (first (string-split kver "-" )))
+  (let ((modpath (string-append "/lib/modules/" kver)))  
+    (cond ((modules-ok? modpath)  #t)
+          ( else (displayln (string-append " in (" modpath ").") stderr) #f)
+          )))
+;;; --------------------------------------------------------
+;;; Kernel sources /usr/src/linux--*
+(define (sources-exist? kver)
+  ;;; Trim the local suffix from kernel version
+  ;;; 4.19.86-gentoo-lf00 => 4.19.86-gentoo
+  (define (generic-kernel-version kver)
+    (first (string-split kver "-" )))
 
-    (define (ksrc-dir kver)
-      ;;; Return the directory containg specific kernel sources
-      (string-append "/usr/src/linux-" (generic-kernel-version kver) "-gentoo")) 
-    (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
-      (file-exists? ksrc-mak)))
-  ;; --------------------------------------------------------
-  
+  (define (ksrc-dir kver)
+    ;;; Return the directory containg specific kernel sources
+    (string-append "/usr/src/linux-" (generic-kernel-version kver) "-gentoo")) 
+  (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
+    (file-exists? ksrc-mak)))
+;; --------------------------------------------------------

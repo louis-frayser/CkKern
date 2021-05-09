@@ -43,15 +43,15 @@
     (drop-prefix (string-append "kernel-" %kname% "-x86_64-") generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
-(displayln "Verifying critical modules for main kernels in /boot...")
-(map (lambda(img)
+(displayln "--\nVerifying critical modules for main kernels in /boot...")
+(void (map (lambda(img)
        (let ((ret (critical-modules-exist? (mod-version img))))
          (display (if ret "  ok: " "fail: "))
-         (displayln (basename img))
+         (displayln (basename img))(newline)
          ret))
-     (get-bootable-images))
+     (get-bootable-images))) ;;; FIXME: fold bootable images using same major version into a single query (or just skip /boot/kernel-kver.old)
 
-(displayln "Verifying disk space on /boot...")
+(displayln "--\nVerifying disk space on /boot...")
 (let ((bfree (df/boot-pct)) )
   (displayln
    (format "   I (/boot):  ~a% of disk is free!" bfree))
@@ -65,14 +65,13 @@
   #|
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
+;;; Check for extraneouse modules in /lib/modules (no matching kern)
 ;;; Verify that linux-headers match kernel version
 ;;; Verify that the latest blessed kernel is installed in /usr/src
-;;; Verify all local souces in /usr/src/linux-* are compiled to /boot
+;;; Verify all local sources in /usr/src/linux-* are compiled to /boot
 ;;; Verify all kernels in /boot are configured in GRUB
 ;;; Verify that the currently running kernel is the latest.
 ;;; Check for unblessed sources in /usr/src/linux-*
-;;; Check for extraneouse modules in /lib/modules (no matching kern)
 ;;; Maybe run lxc-config .. or duplicate it
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
-  
