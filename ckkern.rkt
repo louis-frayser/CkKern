@@ -90,14 +90,17 @@
        (map (lambda(d)(println d stderr)) xtras)))))
   
 
-(define %test check-for-extra-modules)
+;;(define %test check-for-extra-modules)
 
-(define (run)
+(define (main)
   (check-current-kernel)
   (verify-modules)
   (check-disk-space)
   (check-for-extra-modules)
   )
+(define run main)
+
+(main)
 
 #|
 TODO...

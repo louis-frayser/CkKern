@@ -1,9 +1,10 @@
 .SUFFIXES: .rkt
-Srcs= ckkern.rkt io.rkt 
+Srcs= ckkern.rkt params.rkt io.rkt 
 TestSrcs=unit-tests.rkt
 % : %.rkt
 	raco exe $<
-all:
+
+all: ckkern
 clean:
 	@echo CLEAN:
 	@for x in '#'* *~; do { test -e "$$x" && rm -v "$$x"; } || true ;done
@@ -14,3 +15,6 @@ ckkern: ${Srcs}
 
 wc:
 	@wc -l *.rkt Makefile *.md |sort -n
+
+test run : ckkern
+	./ckkern
