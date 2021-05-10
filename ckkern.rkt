@@ -1,6 +1,6 @@
 #lang racket
 (require
-  ;;; NOTE: string-trim from racket differs from srfi/13
+  ;;; NOTE: string-trim,string-prefix?  from racket differs from srfi/13
   (only-in srfi/13 string-drop string-drop-right string-prefix?
            string-suffix? string-contains))
 
@@ -47,8 +47,6 @@
     (drop-prefix %kprefix% generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
-;;; FIXME: fold bootable images using same major version into a single
-;;;    query (or just skip /boot/kernel-kver.old)
 (define (verify-modules)
   (displayln "--\nVerifying critical modules for main kernels in /boot...")
   (void (map (lambda(img)
@@ -105,12 +103,11 @@
 #|
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
-;;; Check for extraneouse modules in /lib/modules (no matching kern)
 ;;; Verify that linux-headers match kernel version
+;;; Verify that the currently running kernel is the latest.
 ;;; Verify that the latest blessed kernel is installed in /usr/src
 ;;; Verify all local sources in /usr/src/linux-* are compiled to /boot
 ;;; Verify all kernels in /boot are configured in GRUB
-;;; Verify that the currently running kernel is the latest.
 ;;; Check for unblessed sources in /usr/src/linux-*
 ;;; Maybe run lxc-config .. or duplicate it
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

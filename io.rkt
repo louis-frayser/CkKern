@@ -30,7 +30,6 @@
 ;;; /boot
 
 ;; find kernel file  for kver
-;; FIXME: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 (define (boot-image-exists? kver)
   (file-exists?
    (string-append "/boot/" %kprefix% kver)))

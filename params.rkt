@@ -1,5 +1,7 @@
 #lang racket
 ;;;; Configuration and runtime parameters
+;; FIXME: %kpefix%: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
+
 (provide %kname% %kprefix% %modules% %modnames%)
 (define %kname% "ghost")
 (define %kprefix% (string-append "kernel-" %kname% "-x86_64-"))
