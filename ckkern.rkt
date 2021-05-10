@@ -1,5 +1,9 @@
 #lang racket
-(require srfi/13) ;; string-suffix?, string-contains
+(require
+  ;;; NOTE: string-trim from racket differs from srfi/13
+  (only-in srfi/13 string-drop string-drop-right string-prefix?
+           string-suffix? string-contains))
+
 (require "params.rkt" "io.rkt")
 
 ;; ----------------------------------------------------
@@ -21,12 +25,12 @@
   (let ((kver (get-kernel-version)))
     (displayln (string-append "Running kernel: " kver "..."))
     (map (lambda(pr)(if (not ((cadr pr) kver) )
-                        (displayln (string-append "FAIL: " (car pr)))
+                        (displayln (string-append "FAIL: " (car pr)) stderr)
                         (displayln (string-append "  ok: " (car pr)))))
          checks))
   #t)
                        
-(check-current-kernel)
+
 ;; .................................................................
 (define (drop-suffix sfx str)
   (if (string-suffix? sfx str)
@@ -40,29 +44,62 @@
 (define (mod-version img-path)
   (let*((basename (last (string-split img-path "/")))
         (generic (drop-suffix ".old" basename)))
-    (drop-prefix (string-append "kernel-" %kname% "-x86_64-") generic)))
+    (drop-prefix %kprefix% generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
-(displayln "--\nVerifying critical modules for main kernels in /boot...")
-(void (map (lambda(img)
-       (let ((ret (critical-modules-exist? (mod-version img))))
-         (display (if ret "  ok: " "fail: "))
-         (displayln (basename img))(newline)
-         ret))
-     (get-bootable-images))) ;;; FIXME: fold bootable images using same major version into a single query (or just skip /boot/kernel-kver.old)
+;;; FIXME: fold bootable images using same major version into a single
+;;;    query (or just skip /boot/kernel-kver.old)
+(define (verify-modules)
+  (displayln "--\nVerifying critical modules for main kernels in /boot...")
+  (void (map (lambda(img)
+               (let ((ret (critical-modules-exist? (mod-version img))))
+                 (display (if ret "  ok: " "fail: "))
+                 (displayln (basename img))(newline)
+                 ret))
+             (get-bootable-images)))) 
 
-(displayln "--\nVerifying disk space on /boot...")
-(let ((bfree (df/boot-pct)) )
-  (displayln
-   (format "   I (/boot):  ~a% of disk is free!" bfree))
-   (cond ( (< bfree 10)
-           (displayln "   W (/boot) space is low." stderr)
-           #f)
-         (else #t)))
-             
-  ;;; Check for 10% space free on /boot
+;;; Check for 10% space free on /boot
+(define (check-disk-space)
+  (displayln "--\nVerifying disk space on /boot...")
+  (let ((bfree (df/boot-pct)) )
+    (displayln
+     (format "   I (/boot):  ~a% of disk is free!" bfree))
+    (cond ( (< bfree 10)
+            (displayln "   W - (/boot): space is low." stderr)
+            #f)
+          (else #t))))
 
-  #|
+;;; Check for extraneous modules in /modules/<kver>
+(define (check-for-extra-modules)
+  (define (required-moddirs)
+    (remove-duplicates
+     (map (lambda(s)(string-trim (string-trim s (string-append "/boot/" %kprefix%)) ".old") )
+          (get-bootable-images))))
+
+  (define (moddirs)
+    (map path->string (directory-list "/lib/modules")))
+  (let* ((xtras (set-subtract (moddirs) (required-moddirs)))
+         (err? (pair? xtras))
+         (mesg (if err? 
+                   "w - Extra entries in /lib/modules:"
+                   "i - Ok: No extra directories in /lib/modules")))
+    (void
+     (newline stderr)
+     (displayln mesg stderr)
+     (when err?
+       (map (lambda(d)(println d stderr)) xtras)))))
+  
+
+(define %test check-for-extra-modules)
+
+(define (run)
+  (check-current-kernel)
+  (verify-modules)
+  (check-disk-space)
+  (check-for-extra-modules)
+  )
+
+#|
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
 ;;; Check for extraneouse modules in /lib/modules (no matching kern)

@@ -33,7 +33,7 @@
 ;; FIXME: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 (define (boot-image-exists? kver)
   (file-exists?
-   (string-append "/boot/kernel-" %kname% "-x86_64-" kver)))
+   (string-append "/boot/" %kprefix% kver)))
 
 (define (get-bootable-images)
   (define maybe-kernel?
