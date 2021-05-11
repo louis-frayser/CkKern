@@ -7,8 +7,13 @@
 (require "params.rkt" "io.rkt")
 
 ;; ----------------------------------------------------
+(define (caddddr xs) (car (cddddr xs)))
 (define (basename str)
   (last (string-split str "/")))
+
+(define (incomplete pname)
+  (error (format "debug: ~a is not yet completely implemented!" pname)))
+      
 ;; ======================================================
 ;;; Very current kernel is installed correctly and has sources
 ;; 1. verify /boot/image /lib/modules for running kernel
@@ -52,7 +57,7 @@
   (void (map (lambda(img)
                (let ((ret (critical-modules-exist? (mod-version img))))
                  (display (if ret "  ok: " "fail: "))
-                 (displayln (basename img))(newline)
+                 (displayln (basename img))
                  ret))
              (get-bootable-images)))) 
 
@@ -86,29 +91,100 @@
      (displayln mesg stderr)
      (when err?
        (map (lambda(d)(println d stderr)) xtras)))))
-  
 
-;;(define %test check-for-extra-modules)
+;;; UUT
+;;; Check for obsolete or non-standard kernels in /boot
+;;; not (in-database) or masked
+;;; This lists kernels installable on the system
+;;; Anything else is obsolete or foreign
+;;; FIXME: does not present rt-sources in a normalized format
+;;;        needs to be rt-sources-$kver-rt{$rev}
+(define (blessed-kpkg-versions)
+  
+  (define (has-valid-kprefix? pkg-ver)
+    ;; valid kenel source package name prefix?
+    ;(displayln pkg-ver)
+    (foldl (lambda(pfx acc) (if (string-prefix? pfx pkg-ver) #t acc))
+           #f
+           %supported-kpkg-prefixes%))
+  
+  (filter has-valid-kprefix?
+          (map path->string (directory-list %kdbdir%))))
+
+(define (check-not-blessed)
+  (define (img->ksrc-ver pth)
+    (let*((img (basename pth))
+          (kname (drop-suffix ".old" img))
+          (ks (string-split kname "-" ))
+          ( kver (cadddr ks))
+          (pkg (caddddr ks))
+          (pv (format "~a-sources-~a" pkg kver)))
+      (displayln (format "debug: checking: ~a" pv)) ; DEBUG
+      pv))
+
+  ;; (define x #false) ; DEBUG
+  (define (haram? kimage)
+    #|
+    (when (not x)  ; DEBUG
+      (set! x (blessed-kpkg-versions))
+      (displayln (format "blessed-kpkg-versions: ~a" x)))
+    |#
+  (not (member (img->ksrc-ver kimage)
+               (blessed-kpkg-versions))))
+(define images (get-bootable-images))
+(define halal (filter haram? images))
+
+;(displayln (format "halal: ~a" halal) stderr)
+
+(define (display-halal)
+  (map (lambda(x)(displayln x stderr)) halal)
+  (void))
+
+(let ((q (length images))
+      (hq (length halal)))
+  (displayln (if (empty? halal)
+                 (format "i - all ~a `/boot' kernel images are blessed")
+                 (format "w - the following ~a of ~a images are not blessed:" hq q))
+             stderr))
+(when (pair? halal)
+  (display-halal)))
 
 (define (main)
   (check-current-kernel)
   (verify-modules)
   (check-disk-space)
   (check-for-extra-modules)
+  ;;(check-not-blessed)
   )
-(define run main)
 
-(main)
+;;; -------------------------------------------------------------
+;;; Run or test?
+(define %debug #t)
+
+;;; When debugging
+;;; 1. invoke (main) to run the productuction version
+;;; 2. invoide (%test) to run only the UUT
+;;; 3. invoke (run for everything)
+(define (run)
+  (main)
+  (%test))
+
+(define %test check-not-blessed)
+(if %debug
+    (%test)
+    (main))
 
 #|
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
-;;; Verify that linux-headers match kernel version
 ;;; Verify that the currently running kernel is the latest.
+;;; 1) works only for gentoo-sources at the moment
+;;;
 ;;; Verify that the latest blessed kernel is installed in /usr/src
 ;;; Verify all local sources in /usr/src/linux-* are compiled to /boot
 ;;; Verify all kernels in /boot are configured in GRUB
 ;;; Check for unblessed sources in /usr/src/linux-*
 ;;; Maybe run lxc-config .. or duplicate it
+;;; Verify that linux-headers match kernel version
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
