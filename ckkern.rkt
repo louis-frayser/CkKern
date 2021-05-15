@@ -132,16 +132,11 @@ Parameters
           ( kver (cadddr ks))
           (pkg (caddddr ks))
           (pv (format "~a-sources-~a" pkg kver)))
-      (displayln (format "debug: checking: ~a" pv)) ; DEBUG
+      (when %debug
+        (displayln (format "debug: checking: ~a" pv))) ; DEBUG
       pv))
 
-  ;; (define x #false) ; DEBUG
   (define (harram? kimage)
-    #|
-    (when (not x)  ; DEBUG
-      (set! x (blessed-kpkg-versions))
-      (displayln (format "blessed-kpkg-versions: ~a" x)))
-    |#
     (not (member (img->ksrc-ver kimage)
                  (blessed-kpkg-versions))))
   (define images (get-bootable-images))
@@ -172,7 +167,7 @@ Parameters
 
 ;;; -------------------------------------------------------------
 ;;; Run or test?
-(define %debug #t)
+(define %debug #f)
 
 ;;; When debugging
 ;;; 1. invoke (main) to run the productuction version
