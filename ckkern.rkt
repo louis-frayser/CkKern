@@ -123,38 +123,38 @@
       pv))
 
   ;; (define x #false) ; DEBUG
-  (define (haram? kimage)
+  (define (harram? kimage)
     #|
     (when (not x)  ; DEBUG
       (set! x (blessed-kpkg-versions))
       (displayln (format "blessed-kpkg-versions: ~a" x)))
     |#
-  (not (member (img->ksrc-ver kimage)
-               (blessed-kpkg-versions))))
-(define images (get-bootable-images))
-(define halal (filter haram? images))
+    (not (member (img->ksrc-ver kimage)
+                 (blessed-kpkg-versions))))
+  (define images (get-bootable-images))
+  (define harram (filter harram? images))
 
-;(displayln (format "halal: ~a" halal) stderr)
+  ;(displayln (format "harram: ~a" harram) stderr)
 
-(define (display-halal)
-  (map (lambda(x)(displayln x stderr)) halal)
-  (void))
+  (define (display-harram)
+    (map (lambda(x)(displayln x stderr)) harram)
+    (void))
 
-(let ((q (length images))
-      (hq (length halal)))
-  (displayln (if (empty? halal)
-                 (format "i - all ~a `/boot' kernel images are blessed")
-                 (format "w - the following ~a of ~a images are not blessed:" hq q))
-             stderr))
-(when (pair? halal)
-  (display-halal)))
+  (let ((q (length images))
+        (hq (length harram)))
+    (displayln (if (empty? harram)
+                   (format "i - all ~a `/boot' kernel images are blessed")
+                   (format "w - the following ~a of ~a images are not blessed:" hq q))
+               stderr))
+  (when (pair? harram)
+    (display-harram)))
 
 (define (main)
   (check-current-kernel)
   (verify-modules)
   (check-disk-space)
   (check-for-extra-modules)
-  ;;(check-not-blessed)
+  (check-not-blessed) ; FIXME: needs to handle rt-sources
   )
 
 ;;; -------------------------------------------------------------
