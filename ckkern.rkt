@@ -1,4 +1,17 @@
 #lang racket
+#| ckkern
+Checks the installed kernels for major modules and source inconsistencies
+1. Verifies sources and modules for the running kernel
+2. Verifies same for the latest "blessed" kernel
+3. Same for rest of the kernels.
+4. Check disk space in /boot
+5. Check for extraneouse modules
+6. Check for obsolete or other nonstandard kernels
+7. Other checks: Seee TODO at bottom of file.
+
+Parameters
+"params.rkt" holds the configuration (may be externalized to the commandline and a config file later)
+|#
 (require
   ;;; NOTE: string-trim,string-prefix?  from racket differs from srfi/13
   (only-in srfi/13 string-drop string-drop-right string-prefix?
@@ -16,8 +29,8 @@
       
 ;; ======================================================
 ;;; Very current kernel is installed correctly and has sources
-;; 1. verify /boot/image /lib/modules for running kernel
-;; 2. verify /lib/modules/kversion has all modules for current kern
+;; 1. verify /boot/kernel /lib/modules for running kernel
+;; 2. verify /lib/modules/$kversion has all modules for current kern
 ;; 3. verify /usr/src/current-kernel-version/Makefile
 (define (check-current-kernel)
   (define checks
@@ -178,13 +191,22 @@
 TODO...
 ;;; Check for extraneous (unblessed) kernels using space in /boot
 ;;; Verify that the currently running kernel is the latest.
-;;; 1) works only for gentoo-sources at the moment
+;;;   *works only for gentoo-sources at the moment
+
 ;;;
 ;;; Verify that the latest blessed kernel is installed in /usr/src
-;;; Verify all local sources in /usr/src/linux-* are compiled to /boot
-;;; Verify all kernels in /boot are configured in GRUB
 ;;; Check for unblessed sources in /usr/src/linux-*
-;;; Maybe run lxc-config .. or duplicate it
+;;;
+
+;;; Support white/blacklist(green/redlined) kernels
+
+;;; Verify all local sources in /usr/src/linux-* are compiled and installed
+
+;;; Verify all kernels in /boot are configured in GRUB;
+;;;   ie grub.cfg newer than every kernel.
+
+;;; Maybe run lxc-config .. or duplicate it (*for each kernel or src?)
 ;;; Verify that linux-headers match kernel version
+;;; Grep the code for items for FIXME items.
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
