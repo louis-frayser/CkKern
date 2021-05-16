@@ -189,7 +189,9 @@ TODO...
 ;;;   *works only for gentoo-sources at the moment
 
 ;;;
-;;; Verify that the latest blessed kernel is installed in /usr/src
+;;; Verify that the all blessed kernels are installed in /usr/src
+;;;     flag the latest blessed kernel.
+;;;
 ;;; Check for unblessed sources in /usr/src/linux-*
 ;;;
 

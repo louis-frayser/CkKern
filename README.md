@@ -15,7 +15,6 @@ It should be easy to work with other kernels.
 This tool helps ensure that the running kernel hasn't been deleted and that critical modules (such as file systems) are available upon reboot.
 
 ## STATUS
-
 Major tasks are completed.  Those are the tasks that verify that the currently running and currently configured kernels are configured for reboot.
 
 See the TODO list at the end of the main source file, "ckkern.rkt."
@@ -24,5 +23,5 @@ See the TODO list at the end of the main source file, "ckkern.rkt."
 CkKern running in DrRacket. A binary executable can be created from the {Racket} menu.
 
 ## NOTES
-In order to read /boot/grub/grub.cfg, that file needs to be made readable to ckkern.  Either run ckkern as superuser
-or add the user to the wheel or root group, then  ( cd/boot/grub; chgrp wheel grub.cfg; chmod g+r grub.cfg).
+In order to read /boot/grub/grub.cfg, that file needs to be made readable to ckkern.  Either run ckkern as superuser (sudo ckkern)
+or add the user to the root group, then  ( cd/boot/grub; chgrp root grub.cfg; chmod g+r grub.cfg).
