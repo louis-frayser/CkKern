@@ -41,11 +41,11 @@
         (cond  ( (string=? "/boot" s) #t)
                ((string-prefix? (string-append "/boot/kernel-" %kname%) s)  #t)
                (else  #f)))))
-  (filter (lambda(s)(not (string=? s "/boot")))
+  (reverse (filter (lambda(s)(not (string=? s "/boot")))
           (map (lambda(p)(path->string p))
                (find-files maybe-kernel?
                            "/boot" #:follow-links? #f
-                           #:skip-filtered-directory? #t))))
+                           #:skip-filtered-directory? #t)))))
 
 ;; --------------------------------------------------------------------
 ;;; Process /usr/portage/suys-kernl/gentoo-sources 

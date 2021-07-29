@@ -44,7 +44,7 @@ Parameters
     (displayln (string-append "Running kernel: " kver "..."))
     (map (lambda(pr)(if (not ((cadr pr) kver) )
                         (displayln (string-append "FAIL: " (car pr)) stderr)
-                        (displayln (string-append "  ok: " (car pr)))))
+                        (displayln (string-append %indent% "ok: " (car pr)))))
          checks))
   #t)
                        
@@ -69,7 +69,7 @@ Parameters
   (displayln "--\nVerifying critical modules for main kernels in /boot...")
   (void (map (lambda(img)
                (let ((ret (critical-modules-exist? (mod-version img))))
-                 (display (if ret "  ok: " "fail: "))
+                 (display (string-append %indent% (if ret "ok: " "fail: ")))
                  (displayln (basename img))
                  ret))
              (get-bootable-images)))) 
@@ -103,7 +103,7 @@ Parameters
      (newline stderr)
      (displayln mesg stderr)
      (when err?
-       (map (lambda(d)(println d stderr)) xtras)))))
+       (map (lambda(d)(fprintf stderr "~a ~s~n" %indent% d)) xtras)))))
 
 ;;; UUT
 ;;; Check for obsolete or non-standard kernels in /boot
@@ -142,14 +142,13 @@ Parameters
   (define images (get-bootable-images))
   (define harram (filter harram? images))
 
-  ;(displayln (format "harram: ~a" harram) stderr)
-
   (define (display-harram)
-    (map (lambda(x)(displayln x stderr)) harram)
+    (map (lambda(x)(displayln (string-append %indent% x) stderr)) harram)
     (void))
 
   (let ((q (length images))
         (hq (length harram)))
+    (newline)
     (displayln (if (empty? harram)
                    (format "i - all ~a `/boot' kernel images are blessed")
                    (format "w - the following ~a of ~a images are not blessed:" hq q))

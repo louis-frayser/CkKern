@@ -2,7 +2,7 @@
 ;;;; Configuration and runtime parameters
 ;; FIXME: %kpefix%: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 
-(provide %kname%  %kdbdir% %kprefix% %modules% %modnames%   %supported-kpkg-prefixes%
+(provide %indent% %kname%  %kdbdir% %kprefix% %modules% %modnames%   %supported-kpkg-prefixes%
          ;;  %kpkgdb%
  )
 (define %kname% "ghost")
@@ -16,3 +16,6 @@
 (define %supported-kpkg-prefixes% '("gentoo-sources" "rt-sources"))
 
 
+
+;;; Formattion output
+(define %indent% "  ")
