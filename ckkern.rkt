@@ -42,7 +42,7 @@ Parameters
 
   (let ((kver (get-kernel-version)))
     (displayln (string-append "Running kernel: " kver "..."))
-    (map (lambda(pr)(if (not ((cadr pr) kver) )
+    (for-each (lambda(pr)(if (not ((cadr pr) kver) )
                         (displayln (string-append "FAIL: " (car pr)) stderr)
                         (displayln (string-append %indent% "ok: " (car pr)))))
          checks))
@@ -60,6 +60,7 @@ Parameters
       str))
 
 (define (mod-version img-path)
+
   (let*((basename (last (string-split img-path "/")))
         (generic (drop-suffix ".old" basename)))
     (drop-prefix %kprefix% generic)))
