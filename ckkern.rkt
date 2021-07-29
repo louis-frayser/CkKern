@@ -48,22 +48,11 @@ Parameters
          checks))
   #t)
                        
-
 ;; .................................................................
-(define (drop-suffix sfx str)
-  (if (string-suffix? sfx str)
-      (string-drop-right str (string-length sfx))
-      str))
-(define (drop-prefix pfx str)
-  (if (string-prefix? pfx str)
-      (string-drop str (string-length pfx))
-      str))
-
 (define (mod-version img-path)
-
   (let*((basename (last (string-split img-path "/")))
-        (generic (drop-suffix ".old" basename)))
-    (drop-prefix %kprefix% generic)))
+        (generic (string-trim basename #:right? #t ".old")))
+    (string-trim generic %kprefix% #:left? #t)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
 (define (verify-modules)
@@ -128,7 +117,7 @@ Parameters
 (define (check-not-blessed)
   (define (img->ksrc-ver pth)
     (let*((img (basename pth))
-          (kname (drop-suffix ".old" img))
+          (kname (string-trim img ".old" #:right? #t))
           (ks (string-split kname "-" ))
           ( kver (cadddr ks))
           (pkg (caddddr ks))
@@ -151,7 +140,7 @@ Parameters
         (hq (length harram)))
     (newline)
     (displayln (if (empty? harram)
-                   (format "i - all ~a `/boot' kernel images are blessed")
+                   (format "i - all ~a `/boot' kernel images are blessed." q)
                    (format "w - the following ~a of ~a images are not blessed:" hq q))
                stderr))
   (when (pair? harram)
