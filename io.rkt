@@ -34,6 +34,16 @@
   (file-exists?
    (string-append "/boot/" %kprefix% kver)))
 
+(define (extract-key s)
+  (let* ((lst (string-split s "-"))
+         (v (map string->number (string-split (fourth lst ) ".")))
+         (r (fifth lst))
+         (x (sixth lst))
+         (v1 (string-join
+              (map (lambda (n)
+           (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v ) ".")))
+    (string-join (list v1 r x) "-")))
+
 (define (get-bootable-images)
   (define maybe-kernel?
     (lambda(p)
@@ -41,11 +51,11 @@
         (cond  ( (string=? "/boot" s) #t)
                ((string-prefix? (string-append "/boot/kernel-" %kname%) s)  #t)
                (else  #f)))))
-  (reverse (filter (lambda(s)(not (string=? s "/boot")))
-          (map (lambda(p)(path->string p))
-               (find-files maybe-kernel?
-                           "/boot" #:follow-links? #f
-                           #:skip-filtered-directory? #t)))))
+  (sort #:key extract-key (filter (lambda(s)(not (string=? s "/boot")))
+                                  (map (lambda(p)(path->string p))
+                                       (find-files maybe-kernel?
+                                                   "/boot" #:follow-links? #f
+                                                   #:skip-filtered-directory? #t))) string<))
 
 ;; --------------------------------------------------------------------
 ;;; Process /usr/portage/suys-kernl/gentoo-sources 
