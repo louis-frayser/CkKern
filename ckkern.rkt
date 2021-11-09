@@ -191,6 +191,9 @@ TODO...
 ;;; Verify all kernels in /boot are configured in GRUB;
 ;;;   ie grub.cfg newer than every kernel.
 
+;;; Check for registering of the running kernel's souces in Gentoo's world file (warn if missing.)
+;;;   this ensures the emerge -depclean won't remove the kernel's sources
+
 ;;; Maybe run lxc-config .. or duplicate it (*for each kernel or src?)
 ;;; Verify that linux-headers match kernel version
 ;;; Grep the code for items for FIXME items.
