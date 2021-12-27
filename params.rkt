@@ -3,8 +3,9 @@
 ;; FIXME: %kpefix%: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 
 (provide %indent% %kname%  %kdbdir% %kprefixes% %modules% %modnames%   %supported-kpkg-prefixes%
-         ;;  %kpkgdb%
+         stderr
  )
+(define stderr (current-error-port))
 
 ;;; Recognizing kernel names
 (define %kname% "ghost")

@@ -1,8 +1,8 @@
 #lang racket
 
-(provide remove-prefixes drop-suffix)
+(provide extract-key  remove-prefixes drop-suffix basename incomplete caddddr)
 
-;(require racket/string) ; string-prefix?; string-suffix? (unlike srfi/13)
+(require "params.rkt")
 (require (only-in srfi/13 string-drop string-drop-right string-prefix?
                   string-suffix? string-contains))
 
@@ -19,3 +19,26 @@
       (substring s 0 (- (string-length s) (string-length sfx)))
       s))
 
+
+;; ----------------------------------------------------
+(define (caddddr xs) (car (cddddr xs)))
+(define (basename str)
+  (last (string-split str "/")))
+
+(define (incomplete pname)
+  (error (format "debug: ~a is not yet completely implemented!" pname)))
+
+;;; --------------------- name strings --------------------------------
+
+
+;;; Produce a sort key from a kernel filename
+(define (extract-key s)  ; kernel-filename->module-dirname as sort-key
+  ;; Remove prefixes, then return normalized_kver[-revision?]-localversion 
+  (let* ((rhs (remove-prefixes %kprefixes% s))
+         (lst (string-split rhs "-"))
+         (v (map string->number (string-split (first lst ) ".")))
+         (rest (string-join (cdr lst)))
+         (v1 (string-join
+              (map (lambda (n)
+                     (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v ) ".")))
+    (string-join (list v1 rest) "-")))
