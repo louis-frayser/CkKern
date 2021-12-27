@@ -3,7 +3,7 @@
 ;;;;
 ;; caution: Racket's string functions are diff from srfi's
 (require srfi/13) ; Strings
-(require "params.rkt")
+(require "params.rkt" "util.rkt")
 
 (provide  boot-image-exists? booted-image-exists? 
           critical-modules-exist? df/boot-pct get-bootable-images
@@ -31,32 +31,42 @@
 
 ;; find kernel file  for kver
 (define (boot-image-exists? kver)
-  (file-exists?
-   (string-append "/boot/" %kprefix% kver)))
+  (define (found? pfx)
+    (file-exists? (string-append "/boot/" pfx kver)))
+     
+  (let loop ( (pfxs %kprefixes%) )
+    (let* ((done? (null? pfxs))
+           ( is-found? (if done? #f (found? (car pfxs))) ))
+      (cond (is-found? #t)
+            (done?  #f)
+            (else  (loop (cdr pfxs)))))))
 
-(define (extract-key s)
-  (let* ((lst (string-split s "-"))
-         (v (map string->number (string-split (fourth lst ) ".")))
-         (r (fifth lst))
-         (x (sixth lst))
+
+;;; Produce a sort key from a kernel filename
+(define (extract-key s)  ; kernel-filename->module-dirname as sort-key
+  ;; Remove prefixes, then return normalized_kver[-revision?]-localversion 
+  (let* ((rhs (remove-prefixes %kprefixes% s))
+         (lst (string-split rhs "-"))
+         (v (map string->number (string-split (first lst ) ".")))
+         (rest (string-join (cdr lst)))
          (v1 (string-join
               (map (lambda (n)
-           (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v ) ".")))
-    (string-join (list v1 r x) "-")))
+                     (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v ) ".")))
+    (string-join (list v1 rest) "-")))
 
-(define (get-bootable-images)
+(define (get-bootable-images) 
   (define maybe-kernel?
     (lambda(p)
       (let ((s (path->string p)))
-        (cond  ( (string=? "/boot" s) #t)
+        (cond  ((string-prefix? (string-append "/boot/vmlinuz-") s)  #t)
                ((string-prefix? (string-append "/boot/kernel-" %kname%) s)  #t)
+               ((string=? "/boot" s) #t)
                (else  #f)))))
   (sort #:key extract-key (filter (lambda(s)(not (string=? s "/boot")))
                                   (map (lambda(p)(path->string p))
                                        (find-files maybe-kernel?
                                                    "/boot" #:follow-links? #f
                                                    #:skip-filtered-directory? #t))) string<))
-
 ;; --------------------------------------------------------------------
 ;;; Process /usr/portage/suys-kernl/gentoo-sources 
 (define (amd64ok? abuild)
@@ -129,6 +139,7 @@
     (set! seq 0)
     (find-files required-module? modpath #:follow-links? #f))
 
+
   ;; Verify all critical modules exists in given modpath
   (define (simple-module-name m)
     (car (string-split (path->string (file-name-from-path m)) ".")))
@@ -169,3 +180,4 @@
   (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
     (file-exists? ksrc-mak)))
 ;; --------------------------------------------------------
+

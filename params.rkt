@@ -2,11 +2,17 @@
 ;;;; Configuration and runtime parameters
 ;; FIXME: %kpefix%: calculate the infix "-ghost-" from $KNAME in /etc/genkernel.conf
 
-(provide %indent% %kname%  %kdbdir% %kprefix% %modules% %modnames%   %supported-kpkg-prefixes%
+(provide %indent% %kname%  %kdbdir% %kprefixes% %modules% %modnames%   %supported-kpkg-prefixes%
          ;;  %kpkgdb%
  )
+
+;;; Recognizing kernel names
 (define %kname% "ghost")
-(define %kprefix% (string-append "kernel-" %kname% "-x86_64-"))
+(define kern-prefix (string-append "kernel-" %kname% "-x86_64-"))
+(define vm-prefix "vmlinuz-" )
+(define %kprefixes% (list vm-prefix kern-prefix))
+
+
 (define %modules% '("loop" "zfs" "spl"  "vboxnetadp"
                             "vboxnetflt" "vboxdrv" ))
 (define %modnames% (map (lambda(s)(string-append s ".ko")) %modules%))

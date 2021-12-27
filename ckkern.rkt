@@ -17,7 +17,7 @@ Parameters
   (only-in srfi/13 string-drop string-drop-right string-prefix?
            string-suffix? string-contains))
 
-(require "params.rkt" "io.rkt")
+(require "params.rkt" "io.rkt" "util.rkt")
 
 ;; ----------------------------------------------------
 (define (caddddr xs) (car (cddddr xs)))
@@ -26,7 +26,8 @@ Parameters
 
 (define (incomplete pname)
   (error (format "debug: ~a is not yet completely implemented!" pname)))
-      
+
+
 ;; ======================================================
 ;;; Very current kernel is installed correctly and has sources
 ;; 1. verify /boot/kernel /lib/modules for running kernel
@@ -42,21 +43,25 @@ Parameters
 
   (let ((kver (get-kernel-version)))
     (displayln (string-append "Running kernel: " kver "..."))
-    (for-each (lambda(pr)(if (not ((cadr pr) kver) )
-                        (displayln (string-append "FAIL: " (car pr)) stderr)
-                        (displayln (string-append %indent% "ok: " (car pr)))))
-         checks))
+    (for-each (lambda(pr)
+                (display (string-append (car pr) "..."))
+                (if (not ((cadr pr) kver) )
+                    ;(displayln (string-append "FAIL: " (car pr)) stderr)
+                    ;(displayln (string-append %indent% "ok: " (car pr)))))
+                    (displayln  "FAIL"  stderr)
+                    (displayln  "Ok" stderr)))
+              checks))
   #t)
-                       
+
 ;; .................................................................
 (define (mod-version img-path)
   (let*((basename (last (string-split img-path "/")))
         (generic (string-trim basename #:right? #t ".old")))
-    (string-trim generic %kprefix% #:left? #t)))
+    (remove-prefixes %kprefixes% generic)))
 
 ;;; Verify critical modules are installed for all kerrnels in /boot
 (define (verify-modules)
-  (displayln "--\nVerifying critical modules for main kernels in /boot...")
+  (displayln "--\nVerifying critical modules for kernels in /boot...")
   (void (map (lambda(img)
                (let ((ret (critical-modules-exist? (mod-version img))))
                  (display (string-append %indent% (if ret "ok: " "fail: ")))
@@ -77,13 +82,14 @@ Parameters
 
 ;;; Check for extraneous modules in /modules/<kver>
 (define (check-for-extra-modules)
+  ;;; Using the kernels's names in /boot determine their module directorie
   (define (required-moddirs)
-    (remove-duplicates
-     (map (lambda(s)(string-trim (string-trim s (string-append "/boot/" %kprefix%)) ".old") )
-          (get-bootable-images))))
-
+    (remove-duplicates (map (lambda(p)(remove-prefixes (cons "/boot/" %kprefixes%) p))
+                            (get-bootable-images))))
+  
   (define (moddirs)
     (map path->string (directory-list "/lib/modules")))
+  ;; entry:
   (let* ((xtras (set-subtract (moddirs) (required-moddirs)))
          (err? (pair? xtras))
          (mesg (if err? 
@@ -115,27 +121,28 @@ Parameters
           (map path->string (directory-list %kdbdir%))))
 
 (define (check-not-blessed)
+ 
   (define (img->ksrc-ver pth)
     (let*((img (basename pth))
           (kname (string-trim img ".old" #:right? #t))
-          (ks (string-split kname "-" ))
-          ( kver (cadddr ks))
-          (pkg (caddddr ks))
-          (pv (format "~a-sources-~a" pkg kver)))
-      (when %debug
-        (displayln (format "debug: checking: ~a" pv))) ; DEBUG
-      pv))
+          (kbase (remove-prefixes %kprefixes% kname))
+          (ks (string-split kbase "-" ))
+          ( kver (car ks))
+          (pkg (cadr ks))
+          (pv (format "~a-sources-~a" pkg kver))) 
+     ; (displayln `(pth: ,pth -- ksrc-ver: ,pv))
+      pv)) ;FIXME: fails "-r1" versions. NOTE: "rt" kernels are never blessed
 
-  (define (harram? kimage)
+  (define (harram? kimage) 
     (not (member (img->ksrc-ver kimage)
                  (blessed-kpkg-versions))))
+
   (define images (get-bootable-images))
   (define harram (filter harram? images))
 
   (define (display-harram)
     (map (lambda(x)(displayln (string-append %indent% x) stderr)) harram)
     (void))
-
   (let ((q (length images))
         (hq (length harram)))
     (newline)
@@ -151,7 +158,7 @@ Parameters
   (verify-modules)
   (check-disk-space)
   (check-for-extra-modules)
-  (check-not-blessed) ; FIXME: needs to handle rt-sources
+  (check-not-blessed) 
   )
 
 ;;; -------------------------------------------------------------
