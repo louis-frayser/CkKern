@@ -121,16 +121,23 @@ Parameters
           (map path->string (directory-list %kdbdir%))))
 
 (define (check-not-blessed)
- 
+  (define (imgtoks->kver ks)
+    ;; Extract version from tokenized kernel name
+    (if ( < (length ks) 2)
+        (car ks)
+        (let ((r (third ks)))
+          (if (string=? r "r1")
+              (string-append (car ks) "-" r)
+              (car ks)))))
   (define (img->ksrc-ver pth)
     (let*((img (basename pth))
           (kname (string-trim img ".old" #:right? #t))
           (kbase (remove-prefixes %kprefixes% kname))
           (ks (string-split kbase "-" ))
-          ( kver (car ks))
-          (pkg (cadr ks))
+          ( kver (imgtoks->kver ks))
+          (pkg (second ks))
           (pv (format "~a-sources-~a" pkg kver))) 
-     ; (displayln `(pth: ,pth -- ksrc-ver: ,pv))
+      ; (displayln `(pth: ,pth -- ksrc-ver: ,pv))
       pv)) ;FIXME: fails "-r1" versions. NOTE: "rt" kernels are never blessed
 
   (define (harram? kimage) 
@@ -204,5 +211,8 @@ TODO...
 ;;; Maybe run lxc-config .. or duplicate it (*for each kernel or src?)
 ;;; Verify that linux-headers match kernel version
 ;;; Grep the code for items for FIXME items.
+
+;;; Change handling of rt-sources (they are never blessed)
+;;; Possibly support gentoo-kernel, gentoo-kernel-bin
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
