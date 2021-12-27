@@ -138,7 +138,7 @@ Parameters
           (pkg (second ks))
           (pv (format "~a-sources-~a" pkg kver))) 
       ; (displayln `(pth: ,pth -- ksrc-ver: ,pv))
-      pv)) ;FIXME: fails "-r1" versions. NOTE: "rt" kernels are never blessed
+      pv)) ; NOTE: "rt" kernels are never blessed
 
   (define (harram? kimage) 
     (not (member (img->ksrc-ver kimage)
@@ -187,12 +187,12 @@ Parameters
 
 #|
 TODO...
-;;; Check for extraneous (unblessed) kernels using space in /boot
+;;; Check for extraneous (unblessed) kernels using up space in /boot
 ;;; Verify that the currently running kernel is the latest.
-;;;   *works only for gentoo-sources at the moment
+;;;   *works only for "gentoo-sources" at the moment
 
 ;;;
-;;; Verify that the all blessed kernels are installed in /usr/src
+;;; Verify that the all blessed kernels (in /boot) are installed in /usr/src
 ;;;     flag the latest blessed kernel.
 ;;;
 ;;; Check for unblessed sources in /usr/src/linux-*
@@ -205,7 +205,8 @@ TODO...
 ;;; Verify all kernels in /boot are configured in GRUB;
 ;;;   ie grub.cfg newer than every kernel.
 
-;;; Check for registering of the running kernel's souces in Gentoo's world file (warn if missing.)
+;;; Check for registering of the running kernel's souces in Gentoo's world file 
+;;; (warn if missing.)
 ;;;   this ensures the emerge -depclean won't remove the kernel's sources
 
 ;;; Maybe run lxc-config .. or duplicate it (*for each kernel or src?)
@@ -213,6 +214,6 @@ TODO...
 ;;; Grep the code for items for FIXME items.
 
 ;;; Change handling of rt-sources (they are never blessed)
-;;; Possibly support gentoo-kernel, gentoo-kernel-bin
+;;; Possibly support 'gentoo-kernel, 'gentoo-kernel-bin
 ;;; TODO ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 |#
