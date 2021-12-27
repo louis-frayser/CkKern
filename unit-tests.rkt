@@ -4,7 +4,11 @@
 Tests consolodaded here from individual modules
 |#
 
-(require "io.rkt")
+(require "io.rkt" "util.rkt")
+
+;;; Util...
+;;(drop-suffix "xyz"  "foo-xyz")
+;;(remove-prefixes '( "abc" "def" )  "abcdef-xxfooo")
 
 #|
 
