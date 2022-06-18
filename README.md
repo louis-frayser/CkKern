@@ -33,4 +33,4 @@ from the {Racket} menu.
 ## NOTES In order to read /boot/grub/grub.cfg, that file
 needs to be made readable to ckkern.  Either run ckkern as
 superuser (sudo ckkern) or add the user to the root group,
-then  ( cd/boot/grub; chgrp root grub.cfg; chmod g+r grub.cfg).
+then  ( cd /boot/grub; chgrp root grub.cfg; chmod g+r grub.cfg).
