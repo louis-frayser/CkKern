@@ -2,7 +2,7 @@
 ;(provide critical-modules-exists?)
 (require "params.rkt" "util.rkt" "io.rkt")
 (require (only-in srfi/13 string< string-drop string-drop-right string-prefix?
-           string-suffix? string-contains))
+                  string-suffix? string-contains))
 ;; ------ Modules ----------------------------------------
 
 (provide critical-modules-exist? mod-version verify-modules)
@@ -22,10 +22,13 @@
   (define-syntax-rule (inc! x) (begin (set! x (+  x 1)) x))
 
   (define (required-module? p)
+    #;(displayln (format "~a: ~s" seq p))
+    ;(printf "~a ~a\n" (file-exists? p) p)
     (and (>  (inc! seq ) (* 256 (length %modules%))) (error "too much!"))
-    (member (last (string-split (path->string p) "/")) %modnames%
-            string=?)) 
-
+    (and (member (last (string-split (path->string p) "/")) %modnames%
+                 modname-string=?) ; cmp basnames, ignoring compression sfxs
+         (file-exists? p)))
+  
   (define (modules-found modpath)
     (set! seq 0)
     (find-files required-module? modpath #:follow-links? #f))
@@ -46,7 +49,8 @@
                 (let* ( (found  (sort (map simple-module-name mfound) string< ))
                         (expected (sort  %modules% string< ))
                         (missing (set-subtract expected found)))
-                  (display (format "e - missing ~a" missing) stderr)         
+                  (printf "found: ~a\nexpected: ~a\n" found expected)
+                  (display (format "e - missing ~a\n" missing) stderr)         
                   #f)))))
           (else 
            (display

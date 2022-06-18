@@ -19,7 +19,8 @@
            (cadr
             (assoc "BOOT_IMAGE"
                    (map (lambda(s)(string-split s "="))
-                        (string-split (file->string "/proc/cmdline" #:mode 'text)))
+                        (string-split 
+                         (file->string "/proc/cmdline" #:mode 'text)))
                    string=?))))
       (string-append "/boot" proc-val)))
   (file-exists? (boot-image)))
@@ -47,11 +48,12 @@
                ((string-prefix? (string-append "/boot/kernel-" %kname%) s)  #t)
                ((string=? "/boot" s) #t)
                (else  #f)))))
-  (sort #:key extract-key (filter (lambda(s)(not (string=? s "/boot")))
-                                  (map (lambda(p)(path->string p))
-                                       (find-files maybe-kernel?
-                                                   "/boot" #:follow-links? #f
-                                                   #:skip-filtered-directory? #t))) string<))
+  (sort #:key extract-key
+        (filter (lambda(s)(not (string=? s "/boot")))
+                (map (lambda(p)(path->string p))
+                     (find-files maybe-kernel?
+                                 "/boot" #:follow-links? #f
+                                 #:skip-filtered-directory? #t))) string<))
 ;; --------------------------------------------------------------------
 ;;; Process /usr/portage/suys-kernl/gentoo-sources 
 (define (amd64ok? abuild)
@@ -89,7 +91,9 @@
 ;;; free space on /boot as a percentage
 (define (df/boot-pct)
   (- 100 (string->number
-          (shell "df /boot | { read ; read _fs _sz _us _av pct _mp;  echo  ${pct%\\%} ; }"))))
+          (shell (string-append 
+                  "df /boot | { read ; read _fs _sz _us _av pct _mp;"
+                  "  echo  ${pct%\\%} ; }")))))
 
 ;;; ------------------------------------------                     
 ;;; GRUB
@@ -113,7 +117,8 @@
 
   (define (ksrc-dir kver)
     ;;; Return the directory containg specific kernel sources
-    (string-append "/usr/src/linux-" (generic-kernel-version kver) "-gentoo")) 
+    (string-append "/usr/src/linux-" (generic-kernel-version kver)
+                   "-gentoo")) 
   (let (( ksrc-mak (string-append (ksrc-dir kver)"/Makefile")))
     (file-exists? ksrc-mak)))
 ;; --------------------------------------------------------

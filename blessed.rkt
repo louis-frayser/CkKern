@@ -58,9 +58,11 @@
   (let ((q (length images))
         (hq (length harram)))
     (newline)
-    (displayln (if (empty? harram)
-                   (format "i - all ~a `/boot' kernel images are blessed." q)
-                   (format "w - the following ~a of ~a images are not blessed:" hq q))
-               stderr))
+    (displayln
+     (if (empty? harram)
+         (format "i - all ~a `/boot' kernel images are blessed." q)
+         (format "w - the following ~a of ~a images in /boot are not blessed:"
+                 hq q))
+     stderr))
   (when (pair? harram)
     (display-harram)))

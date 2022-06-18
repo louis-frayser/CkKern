@@ -1,5 +1,5 @@
 .SUFFIXES: .rkt
-Srcs= ckkern.rkt params.rkt io.rkt 
+Srcs= ckkern.rkt params.rkt io.rkt  kmods.rkt
 TestSrcs=unit-tests.rkt
 % : %.rkt
 	raco exe $<

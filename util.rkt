@@ -1,6 +1,7 @@
 #lang racket
 
-(provide extract-key  remove-prefixes drop-suffix basename incomplete caddddr)
+(provide basename caddddr drop-suffix extract-key incomplete
+         modname-string=? remove-prefixes)
 
 (require "params.rkt")
 (require (only-in srfi/13 string-drop string-drop-right string-prefix?
@@ -29,7 +30,14 @@
   (error (format "debug: ~a is not yet completely implemented!" pname)))
 
 ;;; --------------------- name strings --------------------------------
-
+(define (modname-string=? s t)
+  ;; compare basnames, ignoring comprssion suffixes
+  (define splits (map (lambda(r)(string-split r ".")) (list s t)))
+  ;(displayln `(splits , splits))
+  (and
+   (apply string=? (map car splits))
+   #;(apply string=? (map cadr splits)))) ; comparing (("foo") ("foo" "ko"))
+;;; ...................................................................
 
 ;;; Produce a sort key from a kernel filename
 (define (extract-key s)  ; kernel-filename->module-dirname as sort-key
@@ -40,5 +48,6 @@
          (rest (string-join (cdr lst)))
          (v1 (string-join
               (map (lambda (n)
-                     (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v ) ".")))
+                     (~a #:width 4 #:left-pad-string "0" #:align 'right n)) v )
+              ".")))
     (string-join (list v1 rest) "-")))

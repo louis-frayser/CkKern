@@ -10,7 +10,8 @@ Checks the installed kernels for major modules and source inconsistencies
 7. Other checks: Seee TODO at bottom of file.
 
 Parameters
-"params.rkt" holds the configuration (may be externalized to the commandline and a config file later)
+"params.rkt" holds the configuration (may be externalized to the commandline
+ and a config file later)
 |#
 (require
   ;;; NOTE: string-trim,string-prefix?  from racket differs from srfi/13

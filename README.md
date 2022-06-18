@@ -12,8 +12,8 @@ certain critical modules.  Also verifies the latest kernel
 and sources are installed.
 
 Currently only the package "sys-kernel/gentoo-sources" is
-supported. And the kernels must be build with "genkernel."
-It should be easy to work with other kernels.
+supported. And the kernels must be built with "genkernel."
+It should be easy to rework with other kernels.
 
 This tool helps ensure that the running kernel hasn't been
 deleted and that critical modules (such as file systems)
